@@ -55,7 +55,7 @@ async function persist(folder: string, mime: string, bytes: Buffer) {
   } catch (diskError) {
     try {
       const row = await prisma.mediaFile.create({
-        data: { folder, filename: name, mime, bytes },
+        data: { folder, filename: name, mime, bytes: new Uint8Array(bytes) },
       });
       return `/api/media/${row.id}`;
     } catch (dbError) {
@@ -98,7 +98,7 @@ export async function savePrivateFile(file: File | Blob | null, folder: string) 
     return relative;
   } catch {
     const row = await prisma.mediaFile.create({
-      data: { folder: `private/${folder}`, filename: name, mime, bytes: buffer },
+        data: { folder: `private/${folder}`, filename: name, mime, bytes: new Uint8Array(buffer) },
     });
     return `private/db/${row.id}`;
   }
