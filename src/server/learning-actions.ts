@@ -7,7 +7,7 @@ import { many, optional, str } from "@/lib/form";
 import { prisma } from "@/lib/prisma";
 import { homeworkWhereForStudent } from "@/lib/visibility";
 import { parseDateOnly } from "@/lib/utils";
-import { getUpload, savePrivateFile } from "@/lib/uploads";
+import { takePrivateUpload } from "@/lib/uploads";
 
 function refresh() {
   revalidatePath("/", "layout");
@@ -53,7 +53,7 @@ export async function saveHomework(formData: FormData) {
     const existing = id ? await prisma.homework.findUnique({ where: { id } }) : null;
     if (existing && existing.facultyId !== faculty.id) return { ok: false as const, error: "You can edit only your own homework." };
     const studentIds = many(formData, "studentIds");
-    const attachmentPath = (await savePrivateFile(getUpload(formData, "attachment"), "homework")) || undefined;
+    const attachmentPath = (await takePrivateUpload(formData, "attachment", "homework")) || undefined;
     const data = {
       title,
       description,
@@ -119,10 +119,10 @@ export async function submitHomework(formData: FormData) {
     if (!homework) return { ok: false as const, error: "This homework is not assigned to you." };
     const text = optional(formData, "text");
     let attachmentPath: string | undefined;
-    const file = getUpload(formData, "attachment");
-    if (file) {
+    const uploaded = await takePrivateUpload(formData, "attachment", "submissions");
+    if (uploaded) {
       if (!homework.allowUpload) return { ok: false as const, error: "File upload is not enabled for this homework." };
-      attachmentPath = (await savePrivateFile(file, "submissions")) || undefined;
+      attachmentPath = uploaded;
     }
     await prisma.homeworkSubmission.upsert({
       where: { homeworkId_studentId: { homeworkId, studentId: student.id } },

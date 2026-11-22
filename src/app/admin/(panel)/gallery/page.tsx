@@ -9,7 +9,7 @@ export default async function GalleryAdmin() {
     <div className="grid gap-6">
       <h1 className="font-serif text-3xl">Gallery</h1>
       <section className="panel">
-        <BoundForm action={saveGalleryImage} className="grid gap-3 md:grid-cols-2">
+        <BoundForm action={saveGalleryImage} uploadFolder="gallery" className="grid gap-3 md:grid-cols-2">
           <label className="text-sm md:col-span-2"><span className="label">Photograph</span><input name="image" type="file" accept="image/*" required className="field" /></label>
           <Field label="Title" name="title" />
           <label className="text-sm"><span className="label">Category</span><select name="category" className="field">{galleryCategories.map((item) => <option key={item}>{item}</option>)}</select></label>

@@ -17,7 +17,7 @@ export default async function NoticesAdmin({ searchParams }: { searchParams: Pro
       <h1 className="font-serif text-3xl">Notices</h1>
       <section className="panel">
         <h2 className="font-serif text-2xl">{editing ? "Edit notice" : "New notice"}</h2>
-        <BoundForm action={saveNotice} className="mt-4 grid gap-3">
+        <BoundForm action={saveNotice} uploadFolder="notices" className="mt-4 grid gap-3">
           {editing ? <input type="hidden" name="id" value={editing.id} /> : null}
           <Field label="Title" name="title" required defaultValue={editing?.title} />
           <label className="text-sm"><span className="label">Description</span><textarea name="description" className="field min-h-32" required defaultValue={editing?.description} /></label>

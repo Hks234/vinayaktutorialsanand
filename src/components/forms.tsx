@@ -200,16 +200,47 @@ export function Field({
   );
 }
 
+function isBrowserFile(value: FormDataEntryValue): value is File {
+  if (typeof value === "string" || !value || typeof value !== "object") return false;
+  const file = value as File;
+  return typeof file.size === "number" && file.size > 0 && typeof file.arrayBuffer === "function";
+}
+
+async function sendFilesThroughUploadApi(data: FormData, folder: string) {
+  const entries = Array.from(data.entries());
+  for (const [key, value] of entries) {
+    if (!isBrowserFile(value)) continue;
+    const body = new FormData();
+    body.set("file", value);
+    body.set("folder", folder);
+    const response = await fetch("/api/upload", { method: "POST", body, credentials: "include" });
+    const text = await response.text();
+    let payload: { path?: string; error?: string } = {};
+    try {
+      payload = JSON.parse(text) as { path?: string; error?: string };
+    } catch {
+      throw new Error(text.replace(/<[^>]+>/g, " ").trim().slice(0, 180) || "Could not upload the photograph.");
+    }
+    if (!response.ok || !payload.path) {
+      throw new Error(payload.error || "Could not upload the photograph.");
+    }
+    data.delete(key);
+    data.set(`${key}_url`, payload.path);
+  }
+}
+
 export function BoundForm({
   action,
   children,
   submit = "Save",
   className = "grid gap-3",
+  uploadFolder = "uploads",
 }: {
   action: (formData: FormData) => Promise<Result>;
   children: React.ReactNode;
   submit?: string;
   className?: string;
+  uploadFolder?: string;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -227,6 +258,7 @@ export function BoundForm({
         setMessage("");
         start(async () => {
           try {
+            await sendFilesThroughUploadApi(data, uploadFolder);
             const result = await action(data);
             if (result.ok === false) {
               setError(result.error || "Could not save.");

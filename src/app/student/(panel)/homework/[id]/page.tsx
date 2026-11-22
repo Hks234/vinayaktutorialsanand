@@ -44,7 +44,7 @@ export default async function StudentHomeworkDetail({ params }: { params: Promis
         <h2 className="font-serif text-2xl">Your submission</h2>
         {submission?.submittedAt ? <p className="mt-2 text-sm text-slate-500">Submitted {formatDateTime(submission.submittedAt)}</p> : null}
         {submission?.feedback ? <p className="mt-2 text-sm">Teacher feedback: {submission.feedback}</p> : null}
-        <BoundForm action={submitHomework} className="mt-4 grid gap-3" submit={submission ? "Update submission" : "Submit homework"}>
+        <BoundForm action={submitHomework} uploadFolder="submissions" className="mt-4 grid gap-3" submit={submission ? "Update submission" : "Submit homework"}>
           <input type="hidden" name="homeworkId" value={homework.id} />
           <label className="text-sm">
             <span className="label">Written answer</span>

@@ -18,6 +18,26 @@ export function getUpload(formData: FormData, key: string) {
   return asUpload(formData.get(key));
 }
 
+export function readUploadedPath(formData: FormData, key: string) {
+  const url = String(formData.get(`${key}_url`) || "").trim();
+  if (url.startsWith("/uploads/") || url.startsWith("/api/media/")) return url;
+  if (url.startsWith("private/") && !url.includes("..") && !url.includes("\\")) return url;
+  return null;
+}
+
+export async function takePublicUpload(formData: FormData, key: string, folder: string) {
+  const file = getUpload(formData, key);
+  if (file) return savePublicFile(file, folder);
+  return readUploadedPath(formData, key);
+}
+
+export async function takePrivateUpload(formData: FormData, key: string, folder: string) {
+  const file = getUpload(formData, key);
+  if (file) return savePrivateFile(file, folder);
+  const saved = readUploadedPath(formData, key);
+  return saved?.startsWith("private/") ? saved : null;
+}
+
 function extensionFor(mime: string) {
   if (mime === "image/jpeg") return "jpg";
   if (mime === "image/png") return "png";
@@ -55,12 +75,12 @@ async function persist(folder: string, mime: string, bytes: Buffer) {
   } catch (diskError) {
     try {
       const row = await prisma.mediaFile.create({
-        data: { folder, filename: name, mime, bytes: new Uint8Array(bytes) },
+        data: { folder, filename: name, mime, payload: bytes.toString("base64") },
       });
       return `/api/media/${row.id}`;
     } catch (dbError) {
-      const disk = diskError instanceof Error ? diskError.message : "could not write the file";
-      const db = dbError instanceof Error ? dbError.message : "database storage failed";
+      const disk = diskError instanceof Error ? diskError.message : "disk write failed";
+      const db = dbError instanceof Error ? dbError.message : "database write failed";
       throw new Error(`Could not store the image. ${disk}. ${db}`);
     }
   }
@@ -98,7 +118,7 @@ export async function savePrivateFile(file: File | Blob | null, folder: string) 
     return relative;
   } catch {
     const row = await prisma.mediaFile.create({
-        data: { folder: `private/${folder}`, filename: name, mime, bytes: new Uint8Array(buffer) },
+      data: { folder: `private/${folder}`, filename: name, mime, payload: buffer.toString("base64") },
     });
     return `private/db/${row.id}`;
   }

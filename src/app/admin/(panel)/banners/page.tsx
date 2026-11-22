@@ -10,7 +10,7 @@ export default async function BannersPage() {
       <h1 className="font-serif text-3xl">Promotional banners</h1>
       <section className="panel">
         <h2 className="font-serif text-2xl">Upload banner</h2>
-        <BoundForm action={saveBanner} className="mt-4 grid gap-3 md:grid-cols-2">
+        <BoundForm action={saveBanner} uploadFolder="banners" className="mt-4 grid gap-3 md:grid-cols-2">
           <label className="text-sm md:col-span-2"><span className="label">Image</span><input name="image" type="file" accept="image/*" className="field" required /></label>
           <Field label="Heading" name="heading" />
           <Field label="Subtitle" name="subtitle" />

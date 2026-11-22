@@ -96,7 +96,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
 
       <section className="panel">
         <h2 className="font-serif text-2xl">{editing ? `Edit ${editing.fullName}` : "Create student"}</h2>
-        <BoundForm action={editing ? updateStudent : createStudent} className="mt-4 grid gap-3 md:grid-cols-2" submit={editing ? "Update student" : "Create student"}>
+        <BoundForm action={editing ? updateStudent : createStudent} uploadFolder="students" className="mt-4 grid gap-3 md:grid-cols-2" submit={editing ? "Update student" : "Create student"}>
           {editing ? <input type="hidden" name="id" value={editing.id} /> : null}
           <Field label="Full name" name="fullName" required defaultValue={editing?.fullName} />
           <Field label="User ID" name="userId" defaultValue={editing?.userId} />

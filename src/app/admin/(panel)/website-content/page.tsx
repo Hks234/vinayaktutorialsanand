@@ -15,7 +15,7 @@ export default async function WebsiteContentPage() {
       </div>
       <section className="panel">
         <h2 className="font-serif text-2xl">Homepage hero</h2>
-        <BoundForm action={saveHero} className="mt-4 grid gap-3">
+        <BoundForm action={saveHero} uploadFolder="hero" className="mt-4 grid gap-3">
           <Field label="Heading" name="heading" defaultValue={hero.heading} />
           <label className="text-sm"><span className="label">Description</span><textarea name="description" className="field min-h-24" defaultValue={hero.description} /></label>
           <label className="text-sm"><span className="label">Highlight lines, one per line</span><textarea name="pills" className="field min-h-24" defaultValue={hero.pills.join("\n")} /></label>
@@ -98,7 +98,7 @@ export default async function WebsiteContentPage() {
       </section>
       <section className="panel">
         <h2 className="font-serif text-2xl">Contact, footer and logo</h2>
-        <BoundForm action={saveContactSettings} className="mt-4 grid gap-3">
+        <BoundForm action={saveContactSettings} uploadFolder="brand" className="mt-4 grid gap-3">
           <label className="text-sm"><span className="label">Address</span><textarea name="address" className="field min-h-20" defaultValue={contact.address} /></label>
           <Field label="Phone" name="phone" defaultValue={contact.phone} />
           <Field label="Working hours" name="hours" defaultValue={contact.hours} />

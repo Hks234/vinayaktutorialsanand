@@ -12,7 +12,7 @@ export default async function ToppersAdmin() {
         <p className="text-sm text-slate-500">Enter the result exactly as printed, including decimals such as 98.52. Upload a photograph when you add a student, or add one later on an existing card.</p>
       </div>
       <section className="panel">
-        <BoundForm action={saveTopper} className="grid gap-3 md:grid-cols-2">
+        <BoundForm action={saveTopper} uploadFolder="toppers" className="grid gap-3 md:grid-cols-2">
           <Field label="Student name" name="name" required />
           <Field label="Standard" name="standard" required />
           <Field label="Score" name="percentage" type="number" step="0.01" min={0} max={100} placeholder="98.52" required />
@@ -39,7 +39,7 @@ export default async function ToppersAdmin() {
             <div className="min-w-0 flex-1">
               <p className="font-semibold">{topper.name}</p>
               <p className="text-sm text-slate-500">Std {topper.standard} · {scoreLabel(topper.percentage, topper.description)} · {topper.school} · {topper.academicYear}{topper.featured ? " · Homepage" : ""}</p>
-              <BoundForm action={saveTopperPhoto} submit={topper.photoPath ? "Change photo" : "Add photo"} className="mt-3 flex flex-wrap items-end gap-2">
+              <BoundForm action={saveTopperPhoto} uploadFolder="toppers" submit={topper.photoPath ? "Change photo" : "Add photo"} className="mt-3 flex flex-wrap items-end gap-2">
                 <input type="hidden" name="id" value={topper.id} />
                 <label className="min-w-[220px] flex-1 text-sm">
                   <span className="label">{topper.photoPath ? "Replace photograph" : "Add photograph"}</span>

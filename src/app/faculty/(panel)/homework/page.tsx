@@ -28,7 +28,7 @@ export default async function FacultyHomework({ searchParams }: { searchParams: 
       <h1 className="font-serif text-3xl">Homework</h1>
       <section className="panel">
         <h2 className="font-serif text-2xl">{editing ? "Edit homework" : "Assign homework"}</h2>
-        <BoundForm action={saveHomework} className="mt-4 grid gap-3 md:grid-cols-2" submit={editing ? "Update homework" : "Assign homework"}>
+        <BoundForm action={saveHomework} uploadFolder="homework" className="mt-4 grid gap-3 md:grid-cols-2" submit={editing ? "Update homework" : "Assign homework"}>
           {editing ? <input type="hidden" name="id" value={editing.id} /> : null}
           <Field label="Title" name="title" required defaultValue={editing?.title} className="md:col-span-2" />
           <Field label="Subject" name="subjectName" required defaultValue={editing?.subjectName} />

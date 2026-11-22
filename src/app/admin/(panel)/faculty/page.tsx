@@ -53,7 +53,7 @@ export default async function FacultyAdminPage({ searchParams }: { searchParams:
       </div>
       <section className="panel">
         <h2 className="font-serif text-2xl">{editing ? `Edit ${editing.name}` : "Add faculty"}</h2>
-        <BoundForm action={editing ? updateFaculty : createFacultyAccount} className="mt-4 grid gap-3 md:grid-cols-2">
+        <BoundForm action={editing ? updateFaculty : createFacultyAccount} uploadFolder="faculty" className="mt-4 grid gap-3 md:grid-cols-2">
           {editing ? <input type="hidden" name="id" value={editing.id} /> : null}
           <Field label="Name" name="name" required defaultValue={editing?.name} />
           <Field label="User ID" name="userId" defaultValue={editing?.userId} />

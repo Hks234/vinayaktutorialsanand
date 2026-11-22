@@ -24,7 +24,7 @@ export default async function AdminSettings() {
             <figcaption className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Background texture</figcaption>
           </figure>
         </div>
-        <BoundForm action={saveHeroPhotos} className="mt-4 grid gap-3 md:grid-cols-2" submit="Update photographs">
+        <BoundForm action={saveHeroPhotos} uploadFolder="hero" className="mt-4 grid gap-3 md:grid-cols-2" submit="Update photographs">
           <label className="text-sm">
             <span className="label">Replace classroom photograph</span>
             <input name="image" type="file" accept="image/*" className="field" />

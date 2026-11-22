@@ -497,7 +497,7 @@ model MediaFile {
   folder    String
   filename  String
   mime      String
-  bytes     Bytes    @db.LongBlob
+  payload   String   @db.LongText
   createdAt DateTime @default(now())
 
   @@index([folder])

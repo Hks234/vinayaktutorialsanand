@@ -7,7 +7,7 @@ import { getHero } from "@/lib/content";
 import { optional, str } from "@/lib/form";
 import { prisma } from "@/lib/prisma";
 import { parseDateOnly } from "@/lib/utils";
-import { asUpload, getUpload, savePublicFile } from "@/lib/uploads";
+import { takePublicUpload } from "@/lib/uploads";
 import { z } from "zod";
 
 function refresh() {
@@ -26,10 +26,8 @@ async function persistHero(extra: Awaited<ReturnType<typeof getHero>>) {
   });
 }
 
-async function uploadedOrExisting(file: FormDataEntryValue | null, existing: string) {
-  const upload = asUpload(file);
-  if (upload) return (await savePublicFile(upload, "hero")) || existing;
-  return existing;
+async function uploadedOrExisting(formData: FormData, key: string, existing: string) {
+  return (await takePublicUpload(formData, key, "hero")) || existing;
 }
 
 export async function saveHero(formData: FormData) {
@@ -43,8 +41,8 @@ export async function saveHero(formData: FormData) {
     ...previous,
     heading: str(formData, "heading") || previous.heading,
     description: str(formData, "description") || previous.description,
-    backgroundImage: await uploadedOrExisting(formData.get("backgroundImage"), previous.backgroundImage),
-    image: await uploadedOrExisting(formData.get("image"), previous.image),
+    backgroundImage: await uploadedOrExisting(formData, "backgroundImage", previous.backgroundImage),
+    image: await uploadedOrExisting(formData, "image", previous.image),
     primaryCtaText: str(formData, "primaryCtaText") || previous.primaryCtaText,
     primaryCtaHref: str(formData, "primaryCtaHref") || previous.primaryCtaHref || "/admission-enquiry",
     secondaryCtaText: str(formData, "secondaryCtaText") || previous.secondaryCtaText,
@@ -62,8 +60,8 @@ export async function saveHeroPhotos(formData: FormData) {
   const previous = await getHero();
   const extra = {
     ...previous,
-    backgroundImage: await uploadedOrExisting(formData.get("backgroundImage"), previous.backgroundImage),
-    image: await uploadedOrExisting(formData.get("image"), previous.image),
+    backgroundImage: await uploadedOrExisting(formData, "backgroundImage", previous.backgroundImage),
+    image: await uploadedOrExisting(formData, "image", previous.image),
   };
   await persistHero(extra);
   await logActivity({ actorRole: "admin", actorId: admin.id, action: "Updated homepage photographs", entity: "hero" });
@@ -138,11 +136,8 @@ export async function saveContactSettings(formData: FormData) {
   };
   await prisma.websiteSetting.upsert({ where: { key: "contact" }, update: { value: JSON.stringify(contact) }, create: { key: "contact", value: JSON.stringify(contact) } });
   await prisma.websiteSetting.upsert({ where: { key: "footer" }, update: { value: JSON.stringify(footer) }, create: { key: "footer", value: JSON.stringify(footer) } });
-  const logo = getUpload(formData, "logo");
-  if (logo) {
-    const path = await savePublicFile(logo, "brand");
-    if (path) await prisma.websiteSetting.upsert({ where: { key: "logo" }, update: { value: path }, create: { key: "logo", value: path } });
-  }
+  const logoPath = await takePublicUpload(formData, "logo", "brand");
+  if (logoPath) await prisma.websiteSetting.upsert({ where: { key: "logo" }, update: { value: logoPath }, create: { key: "logo", value: logoPath } });
   await logActivity({ actorRole: "admin", actorId: admin.id, action: "Updated website content", entity: "contact" });
   refresh();
   return { ok: true as const };
@@ -153,7 +148,7 @@ export async function saveBanner(formData: FormData) {
   try {
     const id = optional(formData, "id");
     const existing = id ? await prisma.promotionalBanner.findUnique({ where: { id } }) : null;
-    const imagePath = (await savePublicFile(getUpload(formData, "image"), "banners")) || existing?.imagePath;
+    const imagePath = (await takePublicUpload(formData, "image", "banners")) || existing?.imagePath;
     if (!imagePath) return { ok: false as const, error: "Upload a banner image." };
     const data = {
       imagePath,
@@ -196,7 +191,7 @@ export async function saveTopper(formData: FormData) {
     if (name.length < 2 || !standard || !academicYear) return { ok: false as const, error: "Enter the name, standard and academic year." };
     if (!Number.isFinite(percentage) || percentage < 0 || percentage > 100) return { ok: false as const, error: "Enter a score from 0 to 100. Decimals such as 98.52 are allowed." };
     const existing = id ? await prisma.topper.findUnique({ where: { id } }) : null;
-    const photoPath = (await savePublicFile(getUpload(formData, "photo"), "toppers")) || existing?.photoPath;
+    const photoPath = (await takePublicUpload(formData, "photo", "toppers")) || existing?.photoPath;
     const data = {
       name,
       standard,
@@ -224,9 +219,7 @@ export async function saveTopperPhoto(formData: FormData) {
     const id = str(formData, "id");
     const existing = await prisma.topper.findUnique({ where: { id } });
     if (!existing || existing.deletedAt) return { ok: false as const, error: "That result was not found." };
-    const file = getUpload(formData, "photo");
-    if (!file) return { ok: false as const, error: "Choose a photograph to upload." };
-    const photoPath = await savePublicFile(file, "toppers");
+    const photoPath = await takePublicUpload(formData, "photo", "toppers");
     if (!photoPath) return { ok: false as const, error: "Choose a photograph to upload." };
     await prisma.topper.update({ where: { id }, data: { photoPath } });
     await logActivity({ actorRole: "admin", actorId: admin.id, action: "Updated topper photograph", entity: "topper", entityId: id, details: existing.name });
@@ -250,7 +243,7 @@ export async function saveGalleryImage(formData: FormData) {
   try {
     const id = optional(formData, "id");
     const existing = id ? await prisma.galleryImage.findUnique({ where: { id } }) : null;
-    const imagePath = (await savePublicFile(getUpload(formData, "image"), "gallery")) || existing?.imagePath;
+    const imagePath = (await takePublicUpload(formData, "image", "gallery")) || existing?.imagePath;
     if (!imagePath) return { ok: false as const, error: "Upload a photograph." };
     const data = {
       imagePath,

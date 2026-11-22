@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 import { many, optional, str } from "@/lib/form";
 import { prisma } from "@/lib/prisma";
 import { parseDateTimeLocal } from "@/lib/utils";
-import { getUpload, savePrivateFile } from "@/lib/uploads";
+import { takePrivateUpload } from "@/lib/uploads";
 
 function refresh() {
   revalidatePath("/", "layout");
@@ -61,7 +61,7 @@ export async function saveNotice(formData: FormData) {
     if (title.length < 3 || description.length < 3) return { ok: false as const, error: "Enter a title and description." };
     const classIds = many(formData, "classIds");
     if (audience === "classes" && !classIds.length) return { ok: false as const, error: "Select at least one class." };
-    const attachmentPath = (await savePrivateFile(getUpload(formData, "attachment"), "notices")) || undefined;
+    const attachmentPath = (await takePrivateUpload(formData, "attachment", "notices")) || undefined;
     const data = {
       title,
       description,
