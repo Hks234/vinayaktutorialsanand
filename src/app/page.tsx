@@ -1,103 +1,212 @@
-import Image from "next/image";
+import { EnquiryForm } from "@/components/forms";
+import { BannerSlider } from "@/components/site/BannerSlider";
+import { PageHero } from "@/components/site/PageHero";
+import { Reveal } from "@/components/site/Reveal";
+import { SiteFrame } from "@/components/site/SiteFrame";
+import { Avatar } from "@/components/ui";
+import { scoreLabel } from "@/lib/brochure-toppers";
+import { activeBanners, getAbout, getFeatures, getHero, getMethods, getPrograms } from "@/lib/content";
+import { prisma } from "@/lib/prisma";
+import { publicNoticeWhere } from "@/lib/visibility";
 
-export default function Home() {
+export default async function HomePage() {
+  const [hero, about, programs, features, methods, banners, toppers, faculty, notices] = await Promise.all([
+    getHero(),
+    getAbout(),
+    getPrograms(),
+    getFeatures(),
+    getMethods(),
+    activeBanners(),
+    prisma.topper.findMany({ where: { deletedAt: null }, orderBy: [{ featured: "desc" }, { displayOrder: "asc" }], take: 8 }),
+    prisma.faculty.findMany({
+      where: { deletedAt: null, visibleOnWebsite: true, status: "active" },
+      include: { subjects: { include: { subject: true } } },
+      orderBy: { displayOrder: "asc" },
+      take: 5,
+    }),
+    prisma.notice.findMany({
+      where: publicNoticeWhere(),
+      orderBy: { publishAt: "desc" },
+      take: 3,
+    }),
+  ]);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <SiteFrame>
+      <section className="relative overflow-hidden bg-navy text-white">
+        {hero.backgroundImage ? (
+          <img src={hero.backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20" />
+        ) : null}
+        <div className="absolute inset-0 bg-gradient-to-r from-navy via-royal/40 to-navy/70" />
+        <div className={`relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:py-24 ${hero.image ? "md:grid-cols-[1.05fr_0.95fr]" : ""}`}>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blush">Vinayak Tutorials · Anand</p>
+            <h1 className="mt-4 max-w-3xl font-serif text-4xl leading-tight md:text-6xl">{hero.heading}</h1>
+            <p className="mt-5 max-w-xl text-base leading-7 text-white/80">{hero.description}</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a className="btn-primary" href={hero.primaryCtaHref}>
+                {hero.primaryCtaText}
+              </a>
+              <a className="btn-ghost border-white/20 bg-white/10 text-white hover:bg-white/15" href={hero.secondaryCtaHref}>
+                {hero.secondaryCtaText}
+              </a>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-2">
+              {hero.pills.map((pill) => (
+                <span key={pill} className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-blush">
+                  {pill}
+                </span>
+              ))}
+            </div>
+          </div>
+          {hero.image ? (
+            <img src={hero.image} alt="" className="h-[380px] w-full rounded-[2rem] object-cover shadow-[0_30px_80px_-28px_rgba(0,0,0,0.55)] ring-1 ring-white/20" />
+          ) : null}
+        </div>
+      </section>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
+      <BannerSlider banners={banners} />
+
+      <Reveal className="mx-auto grid max-w-6xl gap-6 px-4 py-12 lg:grid-cols-[1.1fr_0.9fr]">
+        <article>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-hot">{about.eyebrow}</p>
+          <h2 className="mt-3 font-serif text-4xl text-navy">{about.title}</h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600">{about.body}</p>
+          <a className="btn-navy mt-6" href="/about">
+            About the institute
           </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
+        </article>
+        <div className="grid gap-3">
+          {features.slice(0, 4).map((feature) => (
+            <article key={feature.title} className="card p-5">
+              <h3 className="font-semibold text-navy">{feature.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{feature.description}</p>
+            </article>
+          ))}
+        </div>
+      </Reveal>
+
+      <section className="bg-white py-12">
+        <div className="mx-auto max-w-6xl px-4">
+          <Reveal>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-hot">Academics</p>
+            <h2 className="mt-2 font-serif text-4xl">Personal group tuition, standard by standard.</h2>
+          </Reveal>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {programs.map((program) => (
+              <Reveal key={program.title}>
+                <article className="card h-full p-6">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-hot">{program.board}</p>
+                  <h3 className="mt-2 font-serif text-2xl">{program.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{program.blurb}</p>
+                  <ul className="mt-4 grid gap-1 text-sm text-navy">
+                    {program.subjects.map((subject) => (
+                      <li key={subject}>{subject}</li>
+                    ))}
+                  </ul>
+                  <a className="btn-primary mt-5" href={program.enquire}>
+                    Enquire Now
+                  </a>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <Reveal>
+          <h2 className="font-serif text-4xl">How teaching moves through the week</h2>
+        </Reveal>
+        <ol className="mt-6 grid gap-3 md:grid-cols-2">
+          {methods.map((step) => (
+            <li key={step.step} className="rounded-3xl bg-white p-5 shadow-card">
+              <span className="text-sm font-semibold text-royal">{step.step}</span>
+              <h3 className="mt-1 font-semibold">{step.title}</h3>
+              <p className="mt-1 text-sm text-slate-600">{step.description}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="bg-navy py-12 text-white">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blush">Results</p>
+              <h2 className="mt-2 font-serif text-4xl">Shining stars of Vinayak</h2>
+            </div>
+            <a className="btn-primary" href="/achievements">
+              All achievements
+            </a>
+          </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {toppers.map((topper) => (
+              <article key={topper.id} className="overflow-hidden rounded-[1.75rem] bg-white text-navy shadow-card">
+                {topper.photoPath ? (
+                  <img src={topper.photoPath} alt="" className="h-56 w-full object-cover object-top" />
+                ) : null}
+                <div className="p-5">
+                  <p className="font-serif text-2xl text-royal">{scoreLabel(topper.percentage, topper.description)}</p>
+                  <h3 className="mt-2 font-semibold">{topper.name}</h3>
+                  <p className="text-sm text-slate-500">Standard {topper.standard}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-6xl gap-6 px-4 py-12 lg:grid-cols-2">
+        <div>
+          <h2 className="font-serif text-4xl">Subject teachers</h2>
+          <div className="mt-6 grid gap-3">
+            {faculty.map((member) => (
+              <article key={member.id} className="card flex items-center gap-4 p-4">
+                <Avatar name={member.name} src={member.photoPath} className="h-14 w-14" />
+                <div>
+                  <h3 className="font-semibold">{member.name}</h3>
+                  <p className="text-sm text-royal">{member.subjects.map((item) => item.subject.name).join(" · ") || member.description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <a className="btn-ghost mt-5" href="/faculty">
+            Meet the faculty
           </a>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        <div>
+          <h2 className="font-serif text-4xl">Notices</h2>
+          <div className="mt-6 grid gap-3">
+            {notices.map((notice) => (
+              <article key={notice.id} className="card p-5">
+                <h3 className="font-semibold">{notice.title}</h3>
+                <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{notice.description}</p>
+                <a className="mt-3 inline-block text-sm font-semibold text-royal" href="/notices">
+                  Read notice
+                </a>
+              </article>
+            ))}
+            {!notices.length ? <p className="text-sm text-slate-500">Notices published by the institute will appear here.</p> : null}
+          </div>
+          <a className="btn-ghost mt-5" href="/notices">
+            All notices
+          </a>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-6xl gap-6 px-4 pb-16 lg:grid-cols-[1fr_320px]">
+        <div className="card p-6">
+          <h2 className="font-serif text-3xl">Enquire for admission</h2>
+          <p className="mt-2 text-sm text-slate-600">This form does not take a payment. The institute will call you on the number you enter.</p>
+          <div className="mt-5">
+            <EnquiryForm />
+          </div>
+        </div>
+        <aside className="overflow-hidden rounded-[2rem]">
+          <PageHero eyebrow="Visit" title="Gopi Cinema Road, Anand." text="204, 205, Radha Swami Sumit. Monday to Saturday." />
+        </aside>
+      </section>
+    </SiteFrame>
   );
 }
