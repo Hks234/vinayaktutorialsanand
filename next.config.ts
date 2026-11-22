@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  serverActions: {
+    bodySizeLimit: "12mb",
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "12mb",

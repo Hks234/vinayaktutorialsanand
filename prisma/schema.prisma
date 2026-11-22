@@ -491,3 +491,15 @@ model Notification {
   @@index([role, userRecordId, readAt])
   @@map("notifications")
 }
+
+model MediaFile {
+  id        String   @id @default(cuid())
+  folder    String
+  filename  String
+  mime      String
+  bytes     Bytes    @db.LongBlob
+  createdAt DateTime @default(now())
+
+  @@index([folder])
+  @@map("media_files")
+}

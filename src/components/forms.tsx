@@ -219,6 +219,7 @@ export function BoundForm({
   return (
     <form
       className={className}
+      encType="multipart/form-data"
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);

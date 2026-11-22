@@ -8,7 +8,7 @@ import { many, optional, str } from "@/lib/form";
 import { generateCode, generatePassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { isSenior, slugUser } from "@/lib/utils";
-import { savePublicFile } from "@/lib/uploads";
+import { getUpload, savePublicFile } from "@/lib/uploads";
 
 function refresh() {
   revalidatePath("/", "layout");
@@ -52,7 +52,7 @@ export async function createStudent(formData: FormData) {
     const password = generatePassword(10);
     const count = await prisma.student.count();
     const year = await prisma.academicYear.findFirst({ where: { isCurrent: true } });
-    const photoPath = await savePublicFile(formData.get("photo") as File | null, "students");
+    const photoPath = await savePublicFile(getUpload(formData, "photo"), "students");
     const student = await prisma.student.create({
       data: {
         studentCode: generateCode("VT-S-", count),
@@ -122,8 +122,8 @@ export async function updateStudent(formData: FormData) {
     if (clash && clash.id !== id) return { ok: false as const, error: "That user ID is already in use." };
     const batchId = optional(formData, "batchId");
     let photoPath = existing.photoPath;
-    const photo = formData.get("photo");
-    if (photo instanceof File && photo.size > 0) photoPath = await savePublicFile(photo, "students");
+    const photo = getUpload(formData, "photo");
+    if (photo) photoPath = await savePublicFile(photo, "students");
     await prisma.student.update({
       where: { id },
       data: {
@@ -219,7 +219,7 @@ export async function createFacultyAccount(formData: FormData) {
     const userId = requested || (await uniqueFacultyUser(`fac.${slugUser(name)}`));
     const password = generatePassword(10);
     const count = await prisma.faculty.count();
-    const photoPath = await savePublicFile(formData.get("photo") as File | null, "faculty");
+    const photoPath = await savePublicFile(getUpload(formData, "photo"), "faculty");
     const faculty = await prisma.faculty.create({
       data: {
         facultyCode: generateCode("VT-F-", count),
@@ -292,8 +292,8 @@ export async function updateFaculty(formData: FormData) {
       if (clash && clash.id !== id) return { ok: false as const, error: "That user ID is already in use." };
     }
     let photoPath = existing.photoPath;
-    const photo = formData.get("photo");
-    if (photo instanceof File && photo.size > 0) photoPath = await savePublicFile(photo, "faculty");
+    const photo = getUpload(formData, "photo");
+    if (photo) photoPath = await savePublicFile(photo, "faculty");
     await prisma.faculty.update({
       where: { id },
       data: {
