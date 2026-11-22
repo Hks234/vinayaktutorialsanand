@@ -4,7 +4,7 @@ export function str(formData: FormData, key: string) {
 
 export function optional(formData: FormData, key: string) {
   const value = str(formData, key);
-  return value.length ? value : null;
+  return value.length ? value : undefined;
 }
 
 export function many(formData: FormData, key: string) {

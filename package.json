@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "node scripts/build.mjs",
     "start": "next start",
     "lint": "eslint",
     "setup": "node scripts/init-env.mjs && node scripts/apply-tidb-env.mjs && prisma generate && prisma db push && prisma db seed",

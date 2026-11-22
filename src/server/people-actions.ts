@@ -266,7 +266,8 @@ async function uniqueFacultyUser(base: string) {
   return `${base}.${Date.now()}`;
 }
 
-async function syncFacultyLinks(facultyId: string, subjectIds: string[], classIds: string[], batchId: string | null) {
+async function syncFacultyLinks(facultyId: string, subjectIds: string[], classIds: string[], batchId?: string | null) {
+  const linkedBatch = batchId || null;
   await prisma.facultySubjectAssignment.deleteMany({ where: { facultyId } });
   await prisma.facultyClassAssignment.deleteMany({ where: { facultyId } });
   if (subjectIds.length) {
@@ -274,7 +275,7 @@ async function syncFacultyLinks(facultyId: string, subjectIds: string[], classId
   }
   if (classIds.length) {
     await prisma.facultyClassAssignment.createMany({
-      data: classIds.map((classId) => ({ facultyId, classId, batchId })),
+      data: classIds.map((classId) => ({ facultyId, classId, batchId: linkedBatch })),
     });
   }
 }

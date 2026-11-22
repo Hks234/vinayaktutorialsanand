@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { logActivity, notifyMany } from "@/lib/activity";
+import { notifyMany } from "@/lib/activity";
 import { requireAdmin } from "@/lib/auth";
 import { optional, str } from "@/lib/form";
 import { generateCode } from "@/lib/password";

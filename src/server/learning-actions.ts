@@ -13,18 +13,20 @@ function refresh() {
   revalidatePath("/", "layout");
 }
 
-async function facultyAllows(facultyId: string, classId: string, batchId: string | null) {
+async function facultyAllows(facultyId: string, classId: string, batchId?: string | null) {
+  const batch = batchId ?? null;
   const rows = await prisma.facultyClassAssignment.findMany({ where: { facultyId, classId } });
-  return rows.some((row) => !row.batchId || row.batchId === batchId);
+  return rows.some((row) => !row.batchId || row.batchId === batch);
 }
 
-async function studentsForAssignment(classId: string, batchId: string | null, studentIds: string[]) {
+async function studentsForAssignment(classId: string, batchId?: string | null, studentIds: string[] = []) {
+  const batch = batchId ?? null;
   return prisma.student.findMany({
     where: {
       deletedAt: null,
       status: "active",
       classId,
-      ...(batchId ? { batchId } : {}),
+      ...(batch ? { batchId: batch } : {}),
       ...(studentIds.length ? { id: { in: studentIds } } : {}),
     },
     select: { id: true },
