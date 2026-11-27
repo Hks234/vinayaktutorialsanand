@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { logActivity, notifyMany } from "@/lib/activity";
 import { requireAdmin } from "@/lib/auth";
-import { getHero } from "@/lib/content";
+import { getHero, getTopperPdfs, type TopperPdf } from "@/lib/content";
+import { randomUUID } from "crypto";
 import { optional, str } from "@/lib/form";
 import { prisma } from "@/lib/prisma";
 import { parseDateOnly } from "@/lib/utils";
@@ -176,6 +177,40 @@ export async function deleteBanner(id: string) {
   const admin = await adminActor();
   await prisma.promotionalBanner.delete({ where: { id } });
   await logActivity({ actorRole: "admin", actorId: admin.id, action: "Deleted banner", entity: "banner", entityId: id });
+  refresh();
+  return { ok: true as const };
+}
+
+async function persistTopperPdfs(items: TopperPdf[]) {
+  await prisma.websiteSetting.upsert({
+    where: { key: "toppersPdfs" },
+    update: { value: JSON.stringify(items) },
+    create: { key: "toppersPdfs", value: JSON.stringify(items) },
+  });
+}
+
+export async function saveTopperPdf(formData: FormData) {
+  const admin = await adminActor();
+  try {
+    const path = await takePublicUpload(formData, "pdf", "toppers", "doc");
+    if (!path) return { ok: false as const, error: "Choose a PDF to upload." };
+    const title = str(formData, "title") || "Our toppers";
+    const items = await getTopperPdfs();
+    items.push({ id: randomUUID(), title, path });
+    await persistTopperPdfs(items);
+    await logActivity({ actorRole: "admin", actorId: admin.id, action: "Uploaded toppers PDF", entity: "toppers_pdf" });
+    refresh();
+    return { ok: true as const };
+  } catch (error) {
+    return { ok: false as const, error: error instanceof Error ? error.message : "Could not save the PDF." };
+  }
+}
+
+export async function deleteTopperPdf(id: string) {
+  const admin = await adminActor();
+  const items = (await getTopperPdfs()).filter((item) => item.id !== id);
+  await persistTopperPdfs(items);
+  await logActivity({ actorRole: "admin", actorId: admin.id, action: "Removed toppers PDF", entity: "toppers_pdf", entityId: id });
   refresh();
   return { ok: true as const };
 }

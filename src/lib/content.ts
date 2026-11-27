@@ -83,6 +83,22 @@ export async function getLogo() {
   return getSetting("logo", "/brand/mark.svg");
 }
 
+export type TopperPdf = {
+  id: string;
+  title: string;
+  path: string;
+};
+
+export async function getTopperPdfs(): Promise<TopperPdf[]> {
+  const raw = await getSetting("toppersPdfs", "[]");
+  try {
+    const parsed = JSON.parse(raw) as TopperPdf[];
+    return Array.isArray(parsed) ? parsed.filter((item) => item?.id && item?.path) : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function activeBanners() {
   const now = new Date();
   return prisma.promotionalBanner.findMany({

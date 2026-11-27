@@ -319,6 +319,30 @@ export async function updateFaculty(formData: FormData) {
   }
 }
 
+export async function saveFacultyPhoto(formData: FormData) {
+  const admin = await requireAdmin();
+  try {
+    const id = str(formData, "id");
+    const existing = await prisma.faculty.findUnique({ where: { id } });
+    if (!existing || existing.deletedAt) return { ok: false as const, error: "Faculty record not found." };
+    const photoPath = await takePublicUpload(formData, "photo", "faculty");
+    if (!photoPath) return { ok: false as const, error: "Choose a photograph to upload." };
+    await prisma.faculty.update({ where: { id }, data: { photoPath } });
+    await logActivity({
+      actorRole: "admin",
+      actorId: admin.id,
+      action: "Updated faculty photograph",
+      entity: "faculty",
+      entityId: id,
+      details: existing.name,
+    });
+    refresh();
+    return { ok: true as const };
+  } catch (error) {
+    return { ok: false as const, error: error instanceof Error ? error.message : "Could not save the photograph." };
+  }
+}
+
 export async function grantFacultyLogin(facultyId: string) {
   const admin = await requireAdmin();
   const faculty = await prisma.faculty.findUnique({ where: { id: facultyId } });

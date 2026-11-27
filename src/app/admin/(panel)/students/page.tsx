@@ -69,7 +69,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
           <tbody>
             {students.map((student) => (
               <tr key={student.id} className="border-t border-slate-100">
-                <td className="px-4 py-3"><Avatar name={student.fullName} src={student.photoPath} /></td>
+                <td className="px-4 py-3"><Avatar name={student.fullName} src={student.photoPath} className="h-16 w-14" /></td>
                 <td className="px-4 py-3 font-medium">{student.fullName}</td>
                 <td className="px-4 py-3">{student.studentCode}</td>
                 <td className="px-4 py-3">{student.userId}</td>
@@ -134,7 +134,11 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
             <span className="label">Status</span>
             <select name="status" className="field" defaultValue={editing?.status || "active"}><option value="active">Active</option><option value="inactive">Inactive</option></select>
           </label>
-          <label className="text-sm"><span className="label">Photograph</span><input name="photo" type="file" accept="image/*" className="field" /></label>
+          <label className="text-sm">
+            <span className="label">Photograph</span>
+            {editing?.photoPath ? <img src={editing.photoPath} alt="" className="portrait-photo mb-2 h-28 w-24 rounded-2xl" /> : null}
+            <input name="photo" type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="field" />
+          </label>
           <fieldset className="md:col-span-2">
             <legend className="label">Subjects</legend>
             <div className="flex flex-wrap gap-3">

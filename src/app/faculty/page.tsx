@@ -20,13 +20,19 @@ export default async function FacultyPage() {
           <p className="text-sm text-slate-500 md:col-span-2">Faculty profiles appear here after the institute publishes them.</p>
         ) : null}
         {faculty.map((member) => (
-          <article key={member.id} className="card flex gap-4 p-5">
-            <Avatar name={member.name} src={member.photoPath} className="h-20 w-20" />
-            <div>
-              <h2 className="font-serif text-2xl">{member.name}</h2>
-              <p className="mt-1 text-sm font-medium text-royal">{member.subjects.map((item) => item.subject.name).join(" · ") || member.description}</p>
-              {member.qualifications ? <p className="mt-2 text-sm text-slate-600">{member.qualifications}</p> : null}
-              {member.description ? <p className="mt-2 text-sm leading-6 text-slate-600">{member.description}</p> : null}
+          <article key={member.id} className="card overflow-hidden p-0">
+            <div className="flex gap-4 p-5">
+              {member.photoPath ? (
+                <img src={member.photoPath} alt={member.name} className="portrait-photo h-36 w-28 shrink-0 rounded-2xl" />
+              ) : (
+                <Avatar name={member.name} className="h-36 w-28" />
+              )}
+              <div>
+                <h2 className="text-2xl font-semibold text-plum">{member.name}</h2>
+                <p className="mt-1 text-sm font-medium text-orange">{member.subjects.map((item) => item.subject.name).join(" · ") || member.description}</p>
+                {member.qualifications ? <p className="mt-2 text-sm text-slate-600">{member.qualifications}</p> : null}
+                {member.description ? <p className="mt-2 text-sm leading-6 text-slate-600">{member.description}</p> : null}
+              </div>
             </div>
           </article>
         ))}

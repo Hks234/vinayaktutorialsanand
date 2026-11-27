@@ -23,7 +23,7 @@ export default async function StudentProfile({ params }: { params: Promise<{ id:
     <div className="grid gap-4">
       <a href="/admin/students" className="text-sm font-semibold text-royal">Back to students</a>
       <section className="panel flex flex-wrap gap-4">
-        <Avatar name={student.fullName} src={student.photoPath} className="h-20 w-20" />
+        <Avatar name={student.fullName} src={student.photoPath} className="h-28 w-24" />
         <div>
           <h1 className="font-serif text-3xl">{student.fullName}</h1>
           <p className="text-sm text-slate-500">{student.studentCode} · User ID {student.userId}</p>

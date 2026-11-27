@@ -15,9 +15,9 @@ export default async function ContactPage() {
       <PageHero eyebrow="Anand" title="Visit Vinayak Tutorials." text={contact.address} />
       <section className="mx-auto grid max-w-6xl gap-6 px-4 py-12 lg:grid-cols-[0.85fr_1.15fr]">
         <div className="card p-6">
-          <h2 className="font-serif text-2xl">Talk to the institute</h2>
+          <h2 className="text-2xl font-semibold text-plum">Talk to the institute</h2>
           <p className="mt-3 text-sm leading-6 text-slate-600">{contact.address}</p>
-          <p className="mt-3 text-sm"><a className="font-semibold text-royal" href={`tel:${contact.phone.replace(/\s/g, "")}`}>{contact.phone}</a></p>
+          <p className="mt-3 text-sm"><a className="font-semibold text-orange" href={`tel:${contact.phone.replace(/\s/g, "")}`}>{contact.phone}</a></p>
           <p className="mt-2 text-sm text-slate-600">{contact.hours}</p>
           {contact.email ? <p className="mt-2 text-sm">{contact.email}</p> : null}
           <a className="btn-primary mt-5" href={whatsAppLink(contact.phone, "Hello Vinayak Tutorials, I would like to enquire about admission.")}>WhatsApp</a>

@@ -14,7 +14,7 @@ export async function SiteFrame({ children }: { children: React.ReactNode }) {
       <main id="content">{children}</main>
       <a
         href={whatsAppLink(contact.phone, "Hello Vinayak Tutorials, I would like to enquire about admission.")}
-        className="fixed bottom-5 right-5 z-40 rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-18px_rgba(37,211,102,0.9)]"
+        className="fixed bottom-5 right-5 z-40 rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-18px_rgba(37,211,102,0.9)] transition hover:scale-105"
       >
         WhatsApp
       </a>

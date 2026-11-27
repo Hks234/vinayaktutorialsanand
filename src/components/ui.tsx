@@ -20,7 +20,7 @@ export function Empty({ title, text }: { title: string; text: string }) {
 }
 
 export function Avatar({ name, src, className = "h-11 w-11" }: { name: string; src?: string | null; className?: string }) {
-  if (src) return <img src={src} alt="" className={`${className} rounded-2xl object-cover`} />;
+  if (src) return <img src={src} alt={name} className={`${className} portrait-photo rounded-2xl`} />;
   return (
     <span className={`${className} grid place-items-center rounded-2xl bg-ice font-semibold text-royal`}>
       {initials(name) || "VT"}

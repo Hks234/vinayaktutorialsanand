@@ -22,9 +22,9 @@ export default async function NoticesPage() {
               {notice.priority === "important" ? <Badge tone="orange">Important</Badge> : null}
               <span className="text-xs text-slate-500">{formatDate(notice.publishAt || notice.createdAt)}</span>
             </div>
-            <h2 className="mt-3 font-serif text-2xl">{notice.title}</h2>
+            <h2 className="mt-3 text-2xl font-semibold text-plum">{notice.title}</h2>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-600">{notice.description}</p>
-            {notice.attachmentPath ? <a className="mt-3 inline-block text-sm font-semibold text-royal" href={fileHref(notice.attachmentPath) || "#"}>Attachment</a> : null}
+            {notice.attachmentPath ? <a className="mt-3 inline-block text-sm font-semibold text-orange" href={fileHref(notice.attachmentPath) || "#"}>Attachment</a> : null}
           </article>
         ))}
       </section>

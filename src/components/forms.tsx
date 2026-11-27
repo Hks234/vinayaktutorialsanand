@@ -82,14 +82,54 @@ export function AdminProfileForm({ userId, name }: { userId: string; name: strin
   );
 }
 
-export function EnquiryForm({ standard = "", stream = "" }: { standard?: string; stream?: string }) {
+export function EnquiryForm({
+  standard = "",
+  stream = "",
+  variant = "default",
+}: {
+  standard?: string;
+  stream?: string;
+  variant?: "default" | "hero";
+}) {
   const [state, action, pending] = useActionState(submitEnquiry, { error: "", code: "" });
+  const compact = variant === "hero";
   if (state.code) {
     return (
-      <div className="card p-6">
-        <p className="font-serif text-2xl text-navy">Enquiry received</p>
+      <div className={compact ? "rounded-2xl bg-white p-5 text-plum" : "card p-6"}>
+        <p className="text-2xl font-semibold text-navy">Enquiry received</p>
         <p className="mt-2 text-sm leading-6 text-slate-600">Your enquiry ID is <strong>{state.code}</strong>. The institute will contact you on the mobile number you entered.</p>
       </div>
+    );
+  }
+  if (compact) {
+    return (
+      <form action={action} className="grid gap-2.5 text-left">
+        <input name="studentName" className="field field-compact" placeholder="Student name" required />
+        <input name="parentName" className="field field-compact" placeholder="Parent / guardian name" required />
+        <input name="email" type="email" className="field field-compact" placeholder="Email (optional)" />
+        <input name="mobile" className="field field-compact" placeholder="Phone number" required />
+        <select name="standard" className="field field-compact" defaultValue={standard} required>
+          <option value="">Select standard</option>
+          {["Standard 6", "Standard 7", "Standard 8", "Standard 9", "Standard 10", "Standard 11", "Standard 12"].map((item) => (
+            <option key={item}>{item}</option>
+          ))}
+        </select>
+        <div className="grid grid-cols-2 gap-2.5">
+          <select name="board" className="field field-compact" defaultValue="GSEB" required>
+            <option>GSEB</option>
+            <option>CBSE</option>
+          </select>
+          <select name="stream" className="field field-compact" defaultValue={stream}>
+            <option value="">Stream</option>
+            <option value="PCM">PCM</option>
+            <option value="PCB">PCB</option>
+          </select>
+        </div>
+        {state.error ? <p className="text-sm text-rose-600">{state.error}</p> : null}
+        <button className="btn-primary w-full" disabled={pending}>
+          {pending ? "Sending…" : "Enquire Now →"}
+        </button>
+      </form>
     );
   }
   return (

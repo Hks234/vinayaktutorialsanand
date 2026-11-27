@@ -25,9 +25,9 @@ export function readUploadedPath(formData: FormData, key: string) {
   return null;
 }
 
-export async function takePublicUpload(formData: FormData, key: string, folder: string) {
+export async function takePublicUpload(formData: FormData, key: string, folder: string, kind: "image" | "doc" = "image") {
   const file = getUpload(formData, key);
-  if (file) return savePublicFile(file, folder);
+  if (file) return savePublicFile(file, folder, kind);
   return readUploadedPath(formData, key);
 }
 
@@ -94,9 +94,9 @@ export async function savePublicFile(file: File | Blob | null, folder: string, k
   if (mime.includes("heic") || mime.includes("heif") || filename.toLowerCase().endsWith(".heic") || filename.toLowerCase().endsWith(".heif")) {
     throw new Error("iPhone HEIC photos are not supported. Save or export the picture as JPG or PNG, then upload again.");
   }
-  const allowed = kind === "image" ? imageMimes : docMimes;
+  const allowed = kind === "doc" ? docMimes : new Set([...imageMimes, "application/pdf"]);
   if (!allowed.has(mime)) {
-    throw new Error(kind === "image" ? "Upload a JPG, PNG, WEBP or GIF image." : "Upload a JPG, PNG, WEBP, GIF or PDF file.");
+    throw new Error("Upload a JPG, PNG, WEBP, GIF or PDF file.");
   }
   const limit = kind === "image" ? 10 * 1024 * 1024 : 10 * 1024 * 1024;
   if (buffer.length > limit) throw new Error(kind === "image" ? "Image must be under 10 MB." : "File must be under 10 MB.");

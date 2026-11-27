@@ -36,8 +36,10 @@ export async function POST(request: Request) {
     if (!publicFolders.has(folder)) {
       return NextResponse.json({ error: "That upload folder is not allowed." }, { status: 400 });
     }
-    const stored = await savePublicFile(file, folder);
-    if (!stored) return NextResponse.json({ error: "Choose a photograph to upload." }, { status: 400 });
+    const filename = "name" in file ? String((file as File).name || "") : "";
+    const isPdf = (file.type || "").toLowerCase().includes("pdf") || filename.toLowerCase().endsWith(".pdf");
+    const stored = await savePublicFile(file, folder, isPdf ? "doc" : "image");
+    if (!stored) return NextResponse.json({ error: "Choose a file to upload." }, { status: 400 });
     return NextResponse.json({ path: stored });
   } catch (error) {
     return NextResponse.json(

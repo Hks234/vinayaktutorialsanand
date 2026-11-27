@@ -18,7 +18,7 @@ export default async function AboutPage() {
           ["Our Commitment", about.commitment],
         ].map(([title, text]) => (
           <article key={title} className="card p-6">
-            <h2 className="font-serif text-2xl">{title}</h2>
+            <h2 className="text-2xl font-semibold text-plum">{title}</h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">{text}</p>
           </article>
         ))}

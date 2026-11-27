@@ -5,19 +5,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        royal: "#1646A0",
-        navy: "#101D42",
-        blush: "#FFB6D5",
-        hot: "#F15B9B",
-        orange: "#FF793B",
-        ice: "#F2F7FF",
+        royal: "#6B21A8",
+        navy: "#1A0630",
+        plum: "#2B0B45",
+        grape: "#3D1058",
+        blush: "#FFD4A8",
+        hot: "#FF8A00",
+        orange: "#FF8A00",
+        ice: "#F7F4FB",
       },
       fontFamily: {
         sans: ["var(--font-outfit)", "ui-sans-serif", "system-ui", "sans-serif"],
-        serif: ["var(--font-fraunces)", "ui-serif", "Georgia", "serif"],
+        serif: ["var(--font-outfit)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        card: "0 24px 60px -32px rgba(16, 29, 66, 0.35)",
+        card: "0 24px 60px -32px rgba(43, 11, 69, 0.38)",
       },
     },
   },

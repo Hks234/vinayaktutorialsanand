@@ -23,8 +23,8 @@ export function BannerSlider({ banners }: { banners: BannerSlide[] }) {
   if (!banners.length) return null;
   const banner = banners[index];
   return (
-    <section className="mx-auto max-w-6xl px-4 py-6" aria-roledescription="carousel" aria-label="Promotional banners">
-      <div className="relative min-h-[280px] overflow-hidden rounded-[2rem] bg-navy shadow-card md:min-h-[380px]">
+    <section className="mx-auto max-w-6xl px-4 pb-6 pt-16" aria-roledescription="carousel" aria-label="Promotional banners">
+      <div className="relative min-h-[280px] overflow-hidden rounded-[2rem] bg-plum shadow-card md:min-h-[380px]">
         <img src={banner.imagePath} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/75 to-navy/10" />
         <div className="relative z-10 flex min-h-[280px] max-w-xl flex-col justify-center p-8 text-white md:min-h-[380px] md:p-12">

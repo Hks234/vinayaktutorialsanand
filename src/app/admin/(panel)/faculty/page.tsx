@@ -3,7 +3,7 @@ import { Avatar, Badge, Empty } from "@/components/ui";
 import { catalog } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
 import { formatDateTime, one } from "@/lib/utils";
-import { createFacultyAccount, deactivateFaculty, grantFacultyLogin, updateFaculty } from "@/server/people-actions";
+import { createFacultyAccount, deactivateFaculty, grantFacultyLogin, saveFacultyPhoto, updateFaculty } from "@/server/people-actions";
 
 export default async function FacultyAdminPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const editId = one((await searchParams).edit);
@@ -20,36 +20,39 @@ export default async function FacultyAdminPage({ searchParams }: { searchParams:
     <div className="grid gap-6">
       <div>
         <h1 className="font-serif text-3xl">Faculty</h1>
-        <p className="text-sm text-slate-500">Public profiles and portal logins are managed here. A temporary password is shown only when it is generated.</p>
+        <p className="text-sm text-slate-500">Upload a photograph on each teacher. Tick “Show on the homepage” so that photo appears on the public site. A temporary password is shown only when it is generated.</p>
       </div>
-      <div className="overflow-x-auto rounded-3xl bg-white shadow-card">
-        <table className="min-w-full text-left text-sm">
-          <thead className="text-xs uppercase tracking-wider text-slate-500">
-            <tr>{["Photo", "Name", "Faculty ID", "User ID", "Subjects", "Classes", "Status", "Actions"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr>
-          </thead>
-          <tbody>
-            {members.map((member) => (
-              <tr key={member.id} className="border-t border-slate-100 align-top">
-                <td className="px-4 py-3"><Avatar name={member.name} src={member.photoPath} /></td>
-                <td className="px-4 py-3 font-medium">{member.name}</td>
-                <td className="px-4 py-3">{member.facultyCode}</td>
-                <td className="px-4 py-3">{member.userId || "No login yet"}</td>
-                <td className="px-4 py-3">{member.subjects.map((item) => item.subject.name).join(", ")}</td>
-                <td className="px-4 py-3">{member.classes.map((item) => item.class.name).join(", ") || "—"}</td>
-                <td className="px-4 py-3"><Badge tone={member.status === "active" ? "blue" : "slate"}>{member.visibleOnWebsite ? "Visible" : "Hidden"} · {member.status}</Badge></td>
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-2">
-                    <a className="btn-ghost" href={`/admin/faculty?edit=${member.id}`}>Edit</a>
-                    <RunButton label={member.passwordHash ? "Reset password" : "Create login"} run={grantFacultyLogin.bind(null, member.id)} />
-                    <RunButton label="Deactivate" danger confirm="Deactivate this faculty account?" run={deactivateFaculty.bind(null, member.id)} />
-                  </div>
-                  <p className="mt-1 text-xs text-slate-400">Reset: {formatDateTime(member.lastPasswordResetAt)}</p>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {!members.length ? <div className="p-6"><Empty title="No faculty" text="Add a teacher to publish a profile and create a login." /></div> : null}
+      <div className="grid gap-3">
+        {members.map((member) => (
+          <article key={member.id} className="card flex flex-wrap items-start gap-4 p-4">
+            {member.photoPath ? (
+              <img src={member.photoPath} alt={member.name} className="portrait-photo h-28 w-24 rounded-2xl" />
+            ) : (
+              <Avatar name={member.name} className="h-28 w-24" />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">{member.name}</p>
+              <p className="text-sm text-slate-500">{member.facultyCode} · {member.userId || "No login yet"}</p>
+              <p className="mt-1 text-sm text-slate-600">{member.subjects.map((item) => item.subject.name).join(", ") || "No subjects"}</p>
+              <p className="text-sm text-slate-500">{member.classes.map((item) => item.class.name).join(", ") || "No classes"}</p>
+              <div className="mt-2"><Badge tone={member.status === "active" ? "blue" : "slate"}>{member.visibleOnWebsite ? "Visible on homepage" : "Hidden from website"} · {member.status}</Badge></div>
+              <BoundForm action={saveFacultyPhoto} uploadFolder="faculty" submit={member.photoPath ? "Change homepage photo" : "Add homepage photo"} className="mt-3 flex flex-wrap items-end gap-2">
+                <input type="hidden" name="id" value={member.id} />
+                <label className="min-w-[220px] flex-1 text-sm">
+                  <span className="label">{member.photoPath ? "Replace photograph" : "Photograph for homepage"}</span>
+                  <input name="photo" type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="field" required />
+                </label>
+              </BoundForm>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <a className="btn-ghost" href={`/admin/faculty?edit=${member.id}`}>Edit</a>
+                <RunButton label={member.passwordHash ? "Reset password" : "Create login"} run={grantFacultyLogin.bind(null, member.id)} />
+                <RunButton label="Deactivate" danger confirm="Deactivate this faculty account?" run={deactivateFaculty.bind(null, member.id)} />
+              </div>
+              <p className="mt-1 text-xs text-slate-400">Reset: {formatDateTime(member.lastPasswordResetAt)}</p>
+            </div>
+          </article>
+        ))}
+        {!members.length ? <Empty title="No faculty" text="Add a teacher to publish a profile and create a login." /> : null}
       </div>
       <section className="panel">
         <h2 className="font-serif text-2xl">{editing ? `Edit ${editing.name}` : "Add faculty"}</h2>
@@ -63,8 +66,13 @@ export default async function FacultyAdminPage({ searchParams }: { searchParams:
           <Field label="Display order" name="displayOrder" type="number" defaultValue={editing?.displayOrder ?? 0} />
           <label className="text-sm md:col-span-2"><span className="label">Description</span><textarea name="description" className="field min-h-24" defaultValue={editing?.description || ""} /></label>
           <label className="text-sm"><span className="label">Status</span><select name="status" className="field" defaultValue={editing?.status || "active"}><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
-          <label className="text-sm"><span className="label">Photograph</span><input name="photo" type="file" accept="image/*" className="field" /></label>
-          <label className="flex items-center gap-2 text-sm md:col-span-2"><input type="checkbox" name="visibleOnWebsite" value="on" defaultChecked={editing ? editing.visibleOnWebsite : true} /> Show on the public website</label>
+          <label className="text-sm">
+            <span className="label">Photograph for homepage</span>
+            {editing?.photoPath ? <img src={editing.photoPath} alt="" className="portrait-photo mb-2 h-40 w-32 rounded-2xl" /> : null}
+            <input name="photo" type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="field" />
+            <span className="mt-1 block text-xs text-slate-500">JPG or PNG. This photo appears on the homepage and faculty page.</span>
+          </label>
+          <label className="flex items-center gap-2 text-sm md:col-span-2"><input type="checkbox" name="visibleOnWebsite" value="on" defaultChecked={editing ? editing.visibleOnWebsite : true} /> Show on the homepage and faculty page</label>
           <fieldset className="md:col-span-2">
             <legend className="label">Subjects</legend>
             <div className="flex flex-wrap gap-3">{data.subjects.map((subject) => <label key={subject.id} className="text-sm"><input type="checkbox" name="subjectIds" value={subject.id} defaultChecked={editing?.subjects.some((item) => item.subjectId === subject.id)} /> {subject.name}</label>)}</div>

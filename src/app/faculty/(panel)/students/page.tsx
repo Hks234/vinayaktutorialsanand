@@ -16,7 +16,7 @@ export default async function FacultyStudents() {
       {!students.length ? <Empty title="No students yet" text="Students in your classes will appear here." /> : null}
       {students.map((student) => (
         <article key={student.id} className="card flex flex-wrap items-center gap-4 p-4">
-          <Avatar name={student.fullName} src={student.photoPath} />
+          <Avatar name={student.fullName} src={student.photoPath} className="h-16 w-14" />
           <div className="min-w-48 flex-1">
             <h2 className="font-semibold">{student.fullName}</h2>
             <p className="text-sm text-slate-500">{student.studentCode}</p>
